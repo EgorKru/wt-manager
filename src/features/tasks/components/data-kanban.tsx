@@ -108,8 +108,38 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
         destColumn.splice(destination.index, 0, updatedMovedTask);
         newTasks[destStatus] = destColumn;
 
+        // Сохраняем новые позиции в localStorage
+        const projectId = localStorage.getItem('current-project-id');
+        if (projectId) {
+          const savedTasks = localStorage.getItem(`project-${projectId}-tasks`);
+          if (savedTasks) {
+            const allTasks = JSON.parse(savedTasks);
+            
+            // Обновляем позиции всех задач в затронутых колонках
+            const updatedTasks = allTasks.map((task: any) => {
+              // Ищем задачу в новом состоянии канбана по всем колонкам
+              for (const status of Object.keys(newTasks) as TaskStatus[]) {
+                const columnTasks = newTasks[status];
+                const taskIndex = columnTasks.findIndex(t => t.$id === task.id);
+                if (taskIndex !== -1) {
+                  return {
+                    ...task,
+                    status: status,
+                    position: (taskIndex + 1) * 1000
+                  };
+                }
+              }
+              return task; // Если задача не найдена, возвращаем как есть
+            });
+            
+            localStorage.setItem(`project-${projectId}-tasks`, JSON.stringify(updatedTasks));
+            console.log('💾 Saved task positions to localStorage');
+          }
+        }
+
         updatesPayload = [];
 
+        // Отправляем обновление статуса ТОЛЬКО если задача изменила статус (перешла в другую колонку)
         if (sourceStatus !== destStatus) {
           updatesPayload.push({
             $id: updatedMovedTask.$id,
@@ -122,6 +152,7 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
         return newTasks;
       });
 
+      // Отправляем обновления только если есть что обновлять (изменился статус)
       if (updatesPayload.length > 0) {
         onChange(updatesPayload);
       }

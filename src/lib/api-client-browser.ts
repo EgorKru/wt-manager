@@ -380,13 +380,19 @@ class BrowserAPIClient {
       });
       console.log('Project set successfully, received tasks:', tasks);
       
+      // Присваиваем начальные позиции задачам если их нет
+      const tasksWithPositions = tasks.map((task, index) => ({
+        ...task,
+        position: task.position || (index + 1) * 1000 // Присваиваем позицию если её нет
+      }));
+      
       // Сохраняем задачи в localStorage
       if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(`project-${projectId}-tasks`, JSON.stringify(tasks));
+        localStorage.setItem(`project-${projectId}-tasks`, JSON.stringify(tasksWithPositions));
         localStorage.setItem('current-project-id', projectId);
       }
       
-      return tasks;
+      return tasksWithPositions;
     } catch (error) {
       console.error('Error setting project:', error);
       throw error;
@@ -409,7 +415,7 @@ class BrowserAPIClient {
           workspaceId: 'default-workspace',
           assigneeId: task.assignee,
           projectId: task.projectId,
-          position: 1000, // Дефолтная позиция
+          position: task.position || 1000, // Используем сохраненную позицию или дефолтную
           dueDate: task.creationDate, // Используем дату создания как dueDate
           description: task.description,
           // Дополнительные поля для совместимости
@@ -432,6 +438,9 @@ class BrowserAPIClient {
             email: 'user@example.com',
           },
         }));
+        
+        // Сортируем задачи по позиции для правильного отображения
+        transformedTasks.sort((a: any, b: any) => a.position - b.position);
         
         return transformedTasks;
       }
