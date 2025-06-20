@@ -142,6 +142,22 @@ class BrowserAPIClient {
     return this.getUserProjects();
   }
 
+  // Метод для установки активного проекта
+  async setProject(projectId: string) {
+    console.log('Setting project:', projectId);
+    
+    try {
+      const result = await this.request<any>(`/projects/set-project/${projectId}`, {
+        method: 'POST',
+      });
+      console.log('Project set successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('Error setting project:', error);
+      throw error;
+    }
+  }
+
   // Методы для работы с задачами (заглушки пока)
   async getTasks(projectId: string) {
     // TODO: Реализовать когда будут endpoints
