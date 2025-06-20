@@ -161,16 +161,13 @@ export const EditTaskForm = ({
                       </FormControl>
                       <FormMessage />
                       <SelectContent>
-                        <SelectItem value={TaskStatus.BACKLOG}>
-                          Backlog
-                        </SelectItem>
+                        <SelectItem value={TaskStatus.TODO}>Todo</SelectItem>
                         <SelectItem value={TaskStatus.IN_PROGRESS}>
                           In Progress
                         </SelectItem>
                         <SelectItem value={TaskStatus.IN_REVIEW}>
                           In Review
                         </SelectItem>
-                        <SelectItem value={TaskStatus.TODO}>Todo</SelectItem>
                         <SelectItem value={TaskStatus.DONE}>Done</SelectItem>
                       </SelectContent>
                     </Select>

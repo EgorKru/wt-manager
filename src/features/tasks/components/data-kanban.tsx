@@ -12,7 +12,6 @@ import { KanbanCard } from "./kanban-card";
 import { KanbanColumnHeader } from "./kanban-column-header";
 
 const boards: TaskStatus[] = [
-  TaskStatus.BACKLOG,
   TaskStatus.TODO,
   TaskStatus.IN_PROGRESS,
   TaskStatus.IN_REVIEW,
@@ -33,7 +32,6 @@ interface DataKanbanProps {
 export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
   const [tasks, setTasks] = useState<TasksState>(() => {
     const initialTasks: TasksState = {
-      [TaskStatus.BACKLOG]: [],
       [TaskStatus.TODO]: [],
       [TaskStatus.IN_PROGRESS]: [],
       [TaskStatus.IN_REVIEW]: [],
@@ -55,7 +53,6 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
 
   useEffect(() => {
     const newTasks: TasksState = {
-      [TaskStatus.BACKLOG]: [],
       [TaskStatus.TODO]: [],
       [TaskStatus.IN_PROGRESS]: [],
       [TaskStatus.IN_REVIEW]: [],

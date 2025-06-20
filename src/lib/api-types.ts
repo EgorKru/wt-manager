@@ -97,8 +97,7 @@ export enum MemberRole {
 
 // Enum для статусов задач
 export enum TaskStatus {
-  BACKLOG = "BACKLOG",
-  TODO = "TODO", 
+  TODO = "TODO",
   IN_PROGRESS = "IN_PROGRESS",
   IN_REVIEW = "IN_REVIEW",
   DONE = "DONE",
