@@ -2,19 +2,38 @@ import "server-only";
 
 import { getCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
-import {
-  Account,
-  Client,
-  Databases,
-  Models,
-  Storage,
-  type Account as AccountType,
-  type Databases as DatabasesType,
-  type Storage as StorageType,
-  type Users as UsersType,
-} from "node-appwrite";
+import { ACCESS_TOKEN_COOKIE } from "@/features/auth/constants";
+import { createSessionClient } from "./appwrite";
 
-import { AUTH_COOKIE } from "@/features/auth/constants";
+// Типы для совместимости
+interface User {
+  $id: string;
+  name: string;
+  email: string;
+  $createdAt: string;
+}
+
+// Адаптеры для совместимости с AppWriter API
+interface AccountType {
+  get(): Promise<User>;
+}
+
+interface DatabasesType {
+  listDocuments<T>(databaseId: string, collectionId: string, queries?: any[]): Promise<{ total: number; documents: T[] }>;
+  createDocument<T>(databaseId: string, collectionId: string, documentId: string, data: any): Promise<T>;
+  updateDocument<T>(databaseId: string, collectionId: string, documentId: string, data: any): Promise<T>;
+  deleteDocument(databaseId: string, collectionId: string, documentId: string): Promise<void>;
+  getDocument<T>(databaseId: string, collectionId: string, documentId: string): Promise<T>;
+}
+
+interface StorageType {
+  createFile(bucketId: string, fileId: string, file: File): Promise<{ $id: string }>;
+  getFilePreview(bucketId: string, fileId: string): Promise<ArrayBuffer>;
+}
+
+interface UsersType {
+  get(userId: string): Promise<User>;
+}
 
 type AdditionalContext = {
   Variables: {
@@ -22,35 +41,37 @@ type AdditionalContext = {
     databases: DatabasesType;
     storage: StorageType;
     users: UsersType;
-    user: Models.User<Models.Preferences>;
+    user: User;
   };
 };
 
 export const sessionMiddleware = createMiddleware<AdditionalContext>(
   async (c, next) => {
-    const client = new Client()
-      .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-      .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT!);
+    try {
+      const accessToken = getCookie(c, ACCESS_TOKEN_COOKIE);
 
-    const session = getCookie(c, AUTH_COOKIE);
+      if (!accessToken) {
+        return c.json({ error: "Unauthorized - no access token" }, 401);
+      }
 
-    if (!session) {
+      // Создаем клиенты через наш адаптер
+      const sessionClient = await createSessionClient();
+      const user = await sessionClient.account.get();
+
+      // Создаем admin клиент для users
+      const adminClient = await (await import("./appwrite")).createAdminClient();
+      
+      // Устанавливаем переменные контекста
+      c.set("account", sessionClient.account);
+      c.set("databases", sessionClient.databases);
+      c.set("storage", sessionClient.storage);
+      c.set("users", adminClient.users);
+      c.set("user", user);
+
+      await next();
+    } catch (error) {
+      console.error("Session middleware error:", error);
       return c.json({ error: "Unauthorized" }, 401);
     }
-
-    client.setSession(session);
-
-    const account = new Account(client);
-    const databases = new Databases(client);
-    const storage = new Storage(client);
-
-    const user = await account.get();
-
-    c.set("account", account);
-    c.set("databases", databases);
-    c.set("storage", storage);
-    c.set("user", user);
-
-    await next();
   }
 );

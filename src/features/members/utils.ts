@@ -1,8 +1,12 @@
 import { DATABASE_ID, MEMBERS_ID } from "@/config";
-import { Query, type Databases } from "node-appwrite";
+import { Query } from "@/lib/api-types";
+
+interface DatabasesType {
+  listDocuments<T>(databaseId: string, collectionId: string, queries?: any[]): Promise<{ total: number; documents: T[] }>;
+}
 
 interface GetMemberProps {
-  databases: Databases;
+  databases: DatabasesType;
   workspaceId: string;
   userId: string;
 }

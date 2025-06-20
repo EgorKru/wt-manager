@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { Hono } from "hono";
-import { Query } from "node-appwrite";
+import { Query } from "@/lib/api-types";
 import { zValidator } from "@hono/zod-validator";
 
 import { createAdminClient } from "@/lib/appwrite";

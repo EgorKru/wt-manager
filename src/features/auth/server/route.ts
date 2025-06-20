@@ -1,12 +1,12 @@
 import { Hono } from "hono";
-import { ID } from "node-appwrite";
 import { zValidator } from "@hono/zod-validator";
 import { deleteCookie, setCookie } from "hono/cookie";
 
 import { createAdminClient } from "@/lib/appwrite";
 import { sessionMiddleware } from "@/lib/session-middleware";
+import { apiClient } from "@/lib/api-client";
 
-import { AUTH_COOKIE } from "../constants";
+import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from "../constants";
 import { loginSchema, registerSchema } from "../schemas";
 
 const app = new Hono()
@@ -15,46 +15,71 @@ const app = new Hono()
     return c.json({ data: user });
   })
   .post("/login", zValidator("json", loginSchema), async (c) => {
-    const { email, password } = c.req.valid("json");
+    try {
+      const { email, password } = c.req.valid("json");
 
-    const { account } = await createAdminClient();
-    const session = await account.createEmailPasswordSession(email, password);
+      // Используем наш API клиент для логина (передаем email как username)
+      const response = await apiClient.login(email, password);
 
-    setCookie(c, AUTH_COOKIE, session.secret, {
-      path: "/",
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24 * 30,
-    });
+      // Устанавливаем JWT токены в cookies
+      setCookie(c, ACCESS_TOKEN_COOKIE, response.accessToken, {
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 60 * 60 * 24, // 1 день для access token
+      });
 
-    return c.json({ success: true });
+      setCookie(c, REFRESH_TOKEN_COOKIE, response.refreshToken, {
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 60 * 60 * 24 * 30, // 30 дней для refresh token
+      });
+
+      return c.json({ success: true });
+    } catch (error) {
+      console.error("Login error:", error);
+      return c.json({ error: "Invalid credentials" }, 401);
+    }
   })
   .post("/register", zValidator("json", registerSchema), async (c) => {
-    const { email, password, name } = c.req.valid("json");
+    try {
+      const { email, password, name } = c.req.valid("json");
 
-    const { account } = await createAdminClient();
-    await account.create(ID.unique(), email, password, name);
+      // TODO: Реализовать когда будет endpoint для регистрации
+      console.log("Register attempt:", { email, name });
+      
+      // Пока возвращаем ошибку
+      return c.json({ error: "Registration not implemented yet" }, 501);
 
-    const session = await account.createEmailPasswordSession(email, password);
-
-    setCookie(c, AUTH_COOKIE, session.secret, {
-      path: "/",
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24 * 30,
-    });
-
-    return c.json({ success: true });
+      // Когда будет endpoint:
+      // const { account } = await createAdminClient();
+      // await account.create(ID.unique(), email, password, name);
+      // const session = await account.createEmailPasswordSession(email, password);
+      // setCookie(c, ACCESS_TOKEN_COOKIE, session.secret, ...);
+      // return c.json({ success: true });
+    } catch (error) {
+      console.error("Registration error:", error);
+      return c.json({ error: "Registration failed" }, 400);
+    }
   })
   .post("/logout", sessionMiddleware, async (c) => {
-    const account = c.get("account");
+    try {
+      // Удаляем cookies
+      deleteCookie(c, ACCESS_TOKEN_COOKIE);
+      deleteCookie(c, REFRESH_TOKEN_COOKIE);
 
-    deleteCookie(c, AUTH_COOKIE);
-    await account.deleteSession("current");
+      // TODO: Добавить вызов API для logout когда будет endpoint
+      // const account = c.get("account");
+      // await account.deleteSession("current");
 
-    return c.json({ success: true });
+      return c.json({ success: true });
+    } catch (error) {
+      console.error("Logout error:", error);
+      return c.json({ error: "Logout failed" }, 400);
+    }
   });
 
 export default app;

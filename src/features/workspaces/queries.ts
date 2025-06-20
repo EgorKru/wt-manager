@@ -1,4 +1,4 @@
-import { Query } from "node-appwrite";
+import { Query } from "@/lib/api-types";
 
 import { createSessionClient } from "@/lib/appwrite";
 import { DATABASE_ID, MEMBERS_ID, WORKSPACES_ID } from "@/config";
