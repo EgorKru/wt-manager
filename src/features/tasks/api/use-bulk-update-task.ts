@@ -77,9 +77,27 @@ export const useBulkUpdateTask = () => {
       
       await Promise.all(promises);
     },
-    onSuccess: () => {
+    onSuccess: (_, { tasks }) => {
       toast.success("Tasks updated");
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      
+      // Обновляем кеш React Query напрямую вместо инвалидации
+      queryClient.setQueriesData(
+        { queryKey: ["tasks"] },
+        (oldData: any) => {
+          if (!oldData) return oldData;
+          
+          // Обновляем статусы задач в кеше
+          const updatedDocuments = oldData.documents.map((task: any) => {
+            const taskUpdate = tasks.find(t => t.$id === task.$id);
+            return taskUpdate ? { ...task, status: taskUpdate.status } : task;
+          });
+          
+          return {
+            ...oldData,
+            documents: updatedDocuments
+          };
+        }
+      );
     },
     onError: (error) => {
       console.error('Failed to update tasks:', error);

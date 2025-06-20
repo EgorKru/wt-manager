@@ -6,10 +6,14 @@ interface UseGetProjectsProps {
 }
 
 export const useGetProjects = ({ workspaceId }: UseGetProjectsProps) => {
+  // Добавляем stack trace для отслеживания откуда вызывается хук
+  console.log('🔍 useGetProjects called from:', new Error().stack?.split('\n')[2]?.trim());
+  
   const query = useQuery({
     queryKey: ["projects", workspaceId],
     queryFn: async () => {
-      console.log('useGetProjects: fetching projects for workspace:', workspaceId);
+      console.log('🚀 useGetProjects: ACTUAL API CALL for workspace:', workspaceId);
+      console.log('📍 API call stack trace:', new Error().stack?.split('\n')[2]?.trim());
       
       // Для обычных пользователей получаем их проекты напрямую
       const projects = await browserApiClient.getUserProjects();
@@ -31,6 +35,10 @@ export const useGetProjects = ({ workspaceId }: UseGetProjectsProps) => {
         total: documents.length,
       };
     },
+    staleTime: 5 * 60 * 1000, // 5 минут - данные считаются свежими
+    gcTime: 10 * 60 * 1000, // 10 минут - время жизни в кеше  
+    refetchOnWindowFocus: false, // Не перезапрашивать при фокусе окна
+    refetchOnMount: false, // Не перезапрашивать при монтировании если есть кеш
   });
   return query;
 };

@@ -59,6 +59,7 @@ function getUserData() {
 class BrowserAPIClient {
   private baseUrl: string;
   private refreshPromise: Promise<string | null> | null = null;
+  private requestCache: Map<string, Promise<any>> = new Map();
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -319,9 +320,32 @@ class BrowserAPIClient {
 
   // Методы для работы с проектами
   async getUserProjects() {
+    const cacheKey = 'getUserProjects';
+    
+    // Проверяем есть ли уже выполняющийся запрос
+    if (this.requestCache.has(cacheKey)) {
+      console.log('🔄 getUserProjects: returning cached promise');
+      return this.requestCache.get(cacheKey);
+    }
+    
+    // Создаем новый запрос
+    const requestPromise = this.executeGetUserProjects();
+    
+    // Кешируем promise
+    this.requestCache.set(cacheKey, requestPromise);
+    
+    // Очищаем кеш после завершения (успешного или с ошибкой)
+    requestPromise.finally(() => {
+      this.requestCache.delete(cacheKey);
+    });
+    
+    return requestPromise;
+  }
+
+  private async executeGetUserProjects() {
     // Используем endpoint /projects/users-projects
     const url = `${this.baseUrl}${API_VERSION}/projects/users-projects`;
-    console.log('Fetching projects from:', url);
+    console.log('🚀 ACTUAL API CALL - Fetching projects from:', url);
     
     try {
       const projects = await this.request<any[]>('/projects/users-projects');
