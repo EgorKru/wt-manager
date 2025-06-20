@@ -14,7 +14,7 @@ import { KanbanColumnHeader } from "./kanban-column-header";
 const boards: TaskStatus[] = [
   TaskStatus.TODO,
   TaskStatus.IN_PROGRESS,
-  TaskStatus.IN_REVIEW,
+  TaskStatus.REVIEW,
   TaskStatus.DONE,
 ];
 
@@ -25,7 +25,7 @@ type TasksState = {
 interface DataKanbanProps {
   data: Task[];
   onChange: (
-    tasks: { $id: string; status: TaskStatus; position: number }[]
+    tasks: { $id: string; status: TaskStatus; position: number; code?: string }[]
   ) => void;
 }
 
@@ -34,7 +34,7 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
     const initialTasks: TasksState = {
       [TaskStatus.TODO]: [],
       [TaskStatus.IN_PROGRESS]: [],
-      [TaskStatus.IN_REVIEW]: [],
+      [TaskStatus.REVIEW]: [],
       [TaskStatus.DONE]: [],
     };
 
@@ -55,7 +55,7 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
     const newTasks: TasksState = {
       [TaskStatus.TODO]: [],
       [TaskStatus.IN_PROGRESS]: [],
-      [TaskStatus.IN_REVIEW]: [],
+      [TaskStatus.REVIEW]: [],
       [TaskStatus.DONE]: [],
     };
 
@@ -83,6 +83,7 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
         $id: string;
         status: TaskStatus;
         position: number;
+        code?: string;
       }[] = [];
 
       setTasks((prevTasks) => {
@@ -109,45 +110,21 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
 
         updatesPayload = [];
 
-        updatesPayload.push({
-          $id: updatedMovedTask.$id,
-          status: destStatus,
-          position: Math.min((destination.index + 1) * 1000, 1_000_000),
-        });
-
-        newTasks[destStatus].forEach((task, index) => {
-          if (task && task.$id !== updatedMovedTask.$id) {
-            const newPosition = Math.min((index + 1) * 1000, 1_000_000);
-
-            if (task.position !== newPosition) {
-              updatesPayload.push({
-                $id: task.$id,
-                status: destStatus,
-                position: newPosition,
-              });
-            }
-          }
-        });
-
         if (sourceStatus !== destStatus) {
-          newTasks[sourceStatus].forEach((task, index) => {
-            if (task) {
-              const newPosition = Math.min((index + 1) * 1000, 1_000_000);
-
-              if (task.position !== newPosition) {
-                updatesPayload.push({
-                  $id: task.$id,
-                  status: sourceStatus,
-                  position: newPosition,
-                });
-              }
-            }
+          updatesPayload.push({
+            $id: updatedMovedTask.$id,
+            status: destStatus,
+            position: Math.min((destination.index + 1) * 1000, 1_000_000),
+            code: updatedMovedTask.code,
           });
         }
+
         return newTasks;
       });
 
-      onChange(updatesPayload);
+      if (updatesPayload.length > 0) {
+        onChange(updatesPayload);
+      }
     },
     [onChange]
   );

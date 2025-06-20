@@ -2,6 +2,7 @@ import "server-only";
 
 import { cookies } from "next/headers";
 import { apiClient } from "./api-client";
+import { browserApiClient } from './api-client-browser';
 import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from "@/features/auth/constants";
 
 // Типы для совместимости с AppWriter
@@ -42,7 +43,8 @@ class AccountAdapter {
   }
 
   async createEmailPasswordSession(email: string, password: string) {
-    const response = await apiClient.login(email, password);
+    // Используем браузерный клиент для логина (он сохранит токены в cookies)
+    const response = await browserApiClient.login(email, password);
     return {
       secret: response.accessToken,
       userId: 'temp-user-id', // TODO: получать из ответа когда будет endpoint для user info

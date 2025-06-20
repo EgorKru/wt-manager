@@ -47,8 +47,8 @@ export const TaskViewSwticher = ({
   const { mutate: bulkUpdate } = useBulkUpdateTask();
 
   const onKanbanChange = useCallback(
-    (tasks: { $id: string; status: TaskStatus; position: number }[]) => {
-      bulkUpdate({ json: { tasks } });
+    (tasks: { $id: string; status: TaskStatus; position: number; code?: string }[]) => {
+      bulkUpdate({ tasks });
     },
     [bulkUpdate]
   );
