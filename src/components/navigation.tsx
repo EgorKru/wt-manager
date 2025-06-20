@@ -12,35 +12,46 @@ import {
 } from "react-icons/go";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 
-const routes = [
-  { label: "Home", href: "", icon: GoHome, activeIcon: GoHomeFill },
-  {
-    label: "My Tasks",
-    href: "/tasks",
-    icon: GoCheckCircle,
-    activeIcon: GoCheckCircleFill,
-  },
-  {
-    label: "Settings",
-    href: "/settings",
-    icon: SettingsIcon,
-    activeIcon: SettingsIcon,
-  },
-  {
-    label: "Members",
-    href: "/members",
-    icon: UsersIcon,
-    activeIcon: UsersIcon,
-  },
-];
-
 export const Navigation = () => {
   const workspaceId = useWorkspaceId();
   const pathname = usePathname();
+  
+  // Определяем, является ли пользователь обычным
+  const isRegularUser = workspaceId === 'default-workspace';
+
+  const routes = [
+    { label: "Home", href: "", icon: GoHome, activeIcon: GoHomeFill, showForRegular: true },
+    {
+      label: "My Tasks",
+      href: "/tasks",
+      icon: GoCheckCircle,
+      activeIcon: GoCheckCircleFill,
+      showForRegular: true,
+    },
+    {
+      label: "Settings",
+      href: "/settings",
+      icon: SettingsIcon,
+      activeIcon: SettingsIcon,
+      showForRegular: false,
+    },
+    {
+      label: "Members",
+      href: "/members",
+      icon: UsersIcon,
+      activeIcon: UsersIcon,
+      showForRegular: false,
+    },
+  ];
+
+  // Фильтруем маршруты для обычных пользователей
+  const filteredRoutes = isRegularUser 
+    ? routes.filter(route => route.showForRegular)
+    : routes;
 
   return (
     <ul className="flex flex-col">
-      {routes.map((item) => {
+      {filteredRoutes.map((item) => {
         const fullHref = `/workspaces/${workspaceId}${item.href}`;
         const isActive = pathname === fullHref;
         const Icon = isActive ? item.activeIcon : item.icon;

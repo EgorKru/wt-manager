@@ -27,6 +27,9 @@ import { DottedSeparator } from "@/components/dotted-separator";
 export const WorkspaceIdClient = () => {
   const workspaceId = useWorkspaceId();
 
+  // Проверяем, является ли пользователь обычным
+  const isRegularUser = workspaceId === 'default-workspace';
+
   const { data: analytics, isLoading: isLoadingAnalytics } =
     useGetWorkspaceAnalytics({ workspaceId });
   const { data: tasks, isLoading: isLoadingTasks } = useGetTasks({
@@ -40,24 +43,27 @@ export const WorkspaceIdClient = () => {
   });
 
   const isLoading =
-    isLoadingAnalytics ||
+    (!isRegularUser && isLoadingAnalytics) ||
     isLoadingTasks ||
     isLoadingProjects ||
     isLoadingMembers;
 
   if (isLoading) return <PageLoader />;
 
-  if (!analytics || !tasks || !projects || !members)
+  if (!isRegularUser && !analytics)
+    return <PageError message="Failed to load analytics data" />;
+
+  if (!tasks || !projects || !members)
     return <PageError message="Failed to load workspace data" />;
 
   return (
     <div className="h-full flex flex-col space-y-4">
-      <Analytics data={analytics} />
+      {!isRegularUser && analytics && <Analytics data={analytics} />}
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <TaskList data={tasks.documents} total={tasks.total} />
         <ProjectList data={projects.documents} total={projects.total} />
-        <MemberList data={members.documents} total={members.total} />
+        {!isRegularUser && <MemberList data={members.documents} total={members.total} />}
       </div>
     </div>
   );
@@ -126,14 +132,19 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
   const workspaceId = useWorkspaceId();
   const { open } = useCreateProjectModal();
 
+  // Скрываем кнопку создания для обычных пользователей
+  const isRegularUser = workspaceId === 'default-workspace';
+
   return (
     <div className="flex flex-col gap-y-4 col-span-1">
       <div className="bg-white border rounded-lg p-4">
         <div className="flex items-center justify-between">
           <p className="text-lg font-semibold">Projects ({total})</p>
-          <Button variant="secondary" size="icon" onClick={open}>
-            <PlusIcon className="size-4 text-neutral-400" />
-          </Button>
+          {!isRegularUser && (
+            <Button variant="secondary" size="icon" onClick={open}>
+              <PlusIcon className="size-4 text-neutral-400" />
+            </Button>
+          )}
         </div>
         <DottedSeparator className="my-4" />
         <ul className="grid grid-cols-1 lg:grid-cols-2 gap-4">

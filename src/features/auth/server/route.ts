@@ -21,21 +21,33 @@ const app = new Hono()
       // Используем наш API клиент для логина (передаем email как username)
       const response = await apiClient.login(email, password);
 
+      // Определяем secure флаг в зависимости от окружения
+      const isProduction = process.env.NODE_ENV === 'production';
+
       // Устанавливаем JWT токены в cookies
       setCookie(c, ACCESS_TOKEN_COOKIE, response.accessToken, {
         path: "/",
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
+        httpOnly: false, // Разрешаем доступ через JavaScript для внешнего API
+        secure: isProduction, // только для HTTPS в продакшене
+        sameSite: "lax", // более мягкий режим
         maxAge: 60 * 60 * 24, // 1 день для access token
       });
 
       setCookie(c, REFRESH_TOKEN_COOKIE, response.refreshToken, {
         path: "/",
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
+        httpOnly: false, // Разрешаем доступ через JavaScript для внешнего API
+        secure: isProduction, // только для HTTPS в продакшене  
+        sameSite: "lax", // более мягкий режим
         maxAge: 60 * 60 * 24 * 30, // 30 дней для refresh token
+      });
+
+      // Сохраняем email пользователя в отдельной cookie для отображения
+      setCookie(c, "user-email", email, {
+        path: "/",
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24, // 1 день
       });
 
       return c.json({ success: true });
@@ -70,6 +82,7 @@ const app = new Hono()
       // Удаляем cookies
       deleteCookie(c, ACCESS_TOKEN_COOKIE);
       deleteCookie(c, REFRESH_TOKEN_COOKIE);
+      deleteCookie(c, "user-email");
 
       // TODO: Добавить вызов API для logout когда будет endpoint
       // const account = c.get("account");

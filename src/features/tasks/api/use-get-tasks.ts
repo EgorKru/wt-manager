@@ -1,7 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { client } from "@/lib/rpc";
-
 import { TaskStatus } from "../types";
 
 interface UseGetTasksProps {
@@ -32,24 +30,12 @@ export const useGetTasks = ({
       search,
     ],
     queryFn: async () => {
-      const response = await client.api.tasks.$get({
-        query: {
-          workspaceId,
-          assigneeId: assigneeId ?? undefined,
-          dueDate: dueDate ?? undefined,
-          projectId: projectId ?? undefined,
-          status: status ?? undefined,
-          search: search ?? undefined,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch tasks");
-      }
-
-      const { data } = await response.json();
-
-      return data;
+      // TODO: Реализовать когда будет endpoint для получения задач
+      // Пока возвращаем пустой список
+      return {
+        documents: [],
+        total: 0,
+      };
     },
   });
   return query;

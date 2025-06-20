@@ -285,6 +285,24 @@ const app = new Hono()
 
     const { workspaceId } = c.req.param();
 
+    // Для обычных пользователей возвращаем пустую аналитику
+    if (workspaceId === 'default-workspace') {
+      return c.json({
+        data: {
+          taskCount: 0,
+          taskDifference: 0,
+          assignedTaskCount: 0,
+          assignedTaskDifference: 0,
+          completedTaskCount: 0,
+          completedTaskDifference: 0,
+          inCompleteTaskCount: 0,
+          inCompleteTaskDifference: 0,
+          overDueTaskCount: 0,
+          overDueTaskDifference: 0,
+        },
+      });
+    }
+
     const member = await getMember({
       databases,
       userId: user.$id,

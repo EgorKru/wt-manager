@@ -74,14 +74,85 @@ class DatabasesAdapter {
     collectionId: string,
     queries: any[] = []
   ): Promise<ListResult<T>> {
-    // TODO: Реализовать когда будут endpoints
-    console.log('List documents:', { databaseId, collectionId, queries });
-    
-    // Временная заглушка
-    return {
-      total: 0,
-      documents: [],
-    };
+    try {
+      // Обрабатываем запросы к проектам
+      if (collectionId === 'projects') {
+        // Получаем workspaceId из queries
+        const workspaceIdQuery = queries.find(q => q.includes('workspaceId'));
+        const workspaceId = workspaceIdQuery ? workspaceIdQuery.split('"')[1] : null;
+        
+        // Для обычных пользователей игнорируем workspaceId и получаем все их проекты
+        const projects = await apiClient.getUserProjects();
+        
+        // Преобразуем ответ в формат AppWrite
+        const documents = (projects || []).map((project: any) => ({
+          $id: project.projectId,
+          $createdAt: project.createdAt || new Date().toISOString(),
+          $updatedAt: project.updatedAt || new Date().toISOString(),
+          name: project.projectName,
+          workspaceId: workspaceId || 'default-workspace', // Используем default для обычных пользователей
+          imageUrl: project.imageUrl || project.image,
+          projectId: project.projectId,
+          projectName: project.projectName,
+        }));
+        
+        return {
+          total: documents.length,
+          documents: documents as T[],
+        };
+      }
+
+      // Обрабатываем запросы к workspaces
+      if (collectionId === 'workspaces') {
+        // Для обычных пользователей возвращаем фиктивный workspace
+        const defaultWorkspace = {
+          $id: 'default-workspace',
+          $createdAt: new Date().toISOString(),
+          $updatedAt: new Date().toISOString(),
+          name: 'My Projects',
+          userId: 'current-user',
+          inviteCode: null,
+          imageUrl: null,
+        };
+        
+        return {
+          total: 1,
+          documents: [defaultWorkspace] as T[],
+        };
+      }
+
+      // Обрабатываем запросы к members  
+      if (collectionId === 'members') {
+        // Для обычных пользователей возвращаем пустой список
+        return {
+          total: 0,
+          documents: [],
+        };
+      }
+
+      // Обрабатываем запросы к задачам
+      if (collectionId === 'tasks') {
+        // TODO: Реализовать когда будет endpoint для получения задач пользователя
+        // Пока возвращаем пустой список
+        return {
+          total: 0,
+          documents: [],
+        };
+      }
+      
+      // Для остальных коллекций пока возвращаем пустой результат
+      console.log('List documents:', { databaseId, collectionId, queries });
+      return {
+        total: 0,
+        documents: [],
+      };
+    } catch (error) {
+      console.error('Error listing documents:', error);
+      return {
+        total: 0,
+        documents: [],
+      };
+    }
   }
 
   async createDocument<T = Document>(
@@ -90,16 +161,39 @@ class DatabasesAdapter {
     documentId: string,
     data: any
   ): Promise<T> {
-    // TODO: Реализовать когда будут endpoints
-    console.log('Create document:', { databaseId, collectionId, documentId, data });
-    
-    // Временная заглушка
-    return {
-      $id: documentId,
-      $createdAt: new Date().toISOString(),
-      $updatedAt: new Date().toISOString(),
-      ...data,
-    } as T;
+    try {
+      // Обрабатываем создание проекта
+      if (collectionId === 'projects') {
+        const createdProject = await apiClient.createProject({
+          name: data.name,
+          description: data.description || '',
+          // Добавьте другие поля в соответствии с вашим API
+        });
+        
+        // Преобразуем ответ в формат AppWrite
+        return {
+          $id: createdProject.id || createdProject.projectId || documentId,
+          $createdAt: createdProject.createdAt || new Date().toISOString(),
+          $updatedAt: createdProject.updatedAt || new Date().toISOString(),
+          name: createdProject.name || createdProject.projectName,
+          workspaceId: data.workspaceId,
+          imageUrl: data.imageUrl,
+          ...createdProject,
+        } as T;
+      }
+      
+      // Для остальных коллекций временная заглушка
+      console.log('Create document:', { databaseId, collectionId, documentId, data });
+      return {
+        $id: documentId,
+        $createdAt: new Date().toISOString(),
+        $updatedAt: new Date().toISOString(),
+        ...data,
+      } as T;
+    } catch (error) {
+      console.error('Error creating document:', error);
+      throw error;
+    }
   }
 
   async updateDocument<T = Document>(
@@ -108,7 +202,7 @@ class DatabasesAdapter {
     documentId: string,
     data: any
   ): Promise<T> {
-    // TODO: Реализовать когда будут endpoints
+    // TODO: Реализовать когда будут endpoints для обновления проектов
     console.log('Update document:', { databaseId, collectionId, documentId, data });
     
     // Временная заглушка
@@ -121,7 +215,7 @@ class DatabasesAdapter {
   }
 
   async deleteDocument(databaseId: string, collectionId: string, documentId: string): Promise<void> {
-    // TODO: Реализовать когда будут endpoints
+    // TODO: Реализовать когда будут endpoints для удаления проектов
     console.log('Delete document:', { databaseId, collectionId, documentId });
   }
 
@@ -130,15 +224,57 @@ class DatabasesAdapter {
     collectionId: string,
     documentId: string
   ): Promise<T> {
-    // TODO: Реализовать когда будут endpoints
-    console.log('Get document:', { databaseId, collectionId, documentId });
-    
-    // Временная заглушка
-    return {
-      $id: documentId,
-      $createdAt: new Date().toISOString(),
-      $updatedAt: new Date().toISOString(),
-    } as T;
+    try {
+      // Обрабатываем получение проекта по ID
+      if (collectionId === 'projects') {
+        // Пока используем список проектов и ищем по ID
+        const projects = await apiClient.getUserProjects();
+        const project = projects.find((p: any) => 
+          p.id === documentId || p.projectId === documentId
+        );
+        
+        if (!project) {
+          throw new Error('Project not found');
+        }
+        
+        // Преобразуем ответ в формат AppWrite
+        return {
+          $id: project.projectId,
+          $createdAt: project.createdAt || new Date().toISOString(),
+          $updatedAt: project.updatedAt || new Date().toISOString(),
+          name: project.projectName,
+          workspaceId: 'default-workspace',
+          imageUrl: project.imageUrl || project.image,
+          projectId: project.projectId,
+          projectName: project.projectName,
+        } as T;
+      }
+
+      // Обрабатываем получение workspace по ID
+      if (collectionId === 'workspaces' && documentId === 'default-workspace') {
+        // Возвращаем фиктивный workspace для обычных пользователей
+        return {
+          $id: 'default-workspace',
+          $createdAt: new Date().toISOString(),
+          $updatedAt: new Date().toISOString(),
+          name: 'My Projects',
+          userId: 'current-user',
+          inviteCode: null,
+          imageUrl: null,
+        } as T;
+      }
+      
+      // Для остальных коллекций временная заглушка
+      console.log('Get document:', { databaseId, collectionId, documentId });
+      return {
+        $id: documentId,
+        $createdAt: new Date().toISOString(),
+        $updatedAt: new Date().toISOString(),
+      } as T;
+    } catch (error) {
+      console.error('Error getting document:', error);
+      throw error;
+    }
   }
 }
 

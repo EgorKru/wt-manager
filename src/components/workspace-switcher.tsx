@@ -21,6 +21,9 @@ export const WorkspaceSwitcher = () => {
   const { data: workspaces } = useGetWorkspaces();
   const { open } = useCreateWorkspaceModal();
 
+  // Определяем, является ли пользователь обычным
+  const isRegularUser = workspaceId === 'default-workspace';
+
   const onSelect = (id: string) => {
     router.push(`/workspaces/${id}`);
   };
@@ -29,10 +32,12 @@ export const WorkspaceSwitcher = () => {
     <div className="flex flex-col gap-y-2">
       <div className="flex items-center justify-between">
         <p className="text-xs uppercase text-neutral-500">Workspaces</p>
-        <RiAddCircleFill
-          className="size-5 text-neutral-500 cursor-pointer hover:opacity-75 transition"
-          onClick={open}
-        />
+        {!isRegularUser && (
+          <RiAddCircleFill
+            className="size-5 text-neutral-500 cursor-pointer hover:opacity-75 transition"
+            onClick={open}
+          />
+        )}
       </div>
       <Select value={workspaceId} onValueChange={onSelect}>
         <SelectTrigger className="w-full bg-neutral-200 font-medium p-1">

@@ -80,19 +80,24 @@ class APIClient {
     // Пока возвращаем фиксированные данные на основе наличия токена
     const cookieStore = await cookies();
     const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE);
+    const userEmail = cookieStore.get("user-email");
 
     if (!accessToken?.value) {
       throw new Error("Unauthorized - no access token");
     }
 
-    // Временная заглушка - возвращаем фиксированного пользователя
+    // Используем email из cookie
+    const email = userEmail?.value || 'user@example.com';
+    const name = email.split('@')[0]; // Используем часть до @ как имя
+
+    // Временная заглушка - возвращаем пользователя на основе cookie
     // В реальности здесь должен быть запрос к вашему API
     return {
       id: 'temp-user-id',
       userId: 'temp-user-id',
-      name: 'Test User',
-      username: 'test@example.com',
-      email: 'test@example.com',
+      name: name.charAt(0).toUpperCase() + name.slice(1), // Capitalize first letter
+      username: email,
+      email: email,
       createdAt: new Date().toISOString(),
     };
     
@@ -114,10 +119,24 @@ class APIClient {
     });
   }
 
-  // Методы для работы с проектами (заглушки пока)
+  // Методы для работы с проектами
+  async getUserProjects() {
+    // Используем endpoint /projects/users-projects
+    return this.authenticatedRequest<any[]>('/projects/users-projects');
+  }
+
+  async createProject(data: { name: string; description?: string; [key: string]: any }) {
+    // Используем endpoint /projects/create-project
+    return this.authenticatedRequest<any>('/projects/create-project', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
   async getProjects(workspaceId: string) {
     // TODO: Реализовать когда будут endpoints
-    return this.authenticatedRequest<any>(`/workspaces/${workspaceId}/projects`);
+    // Пока используем getUserProjects
+    return this.getUserProjects();
   }
 
   // Методы для работы с задачами (заглушки пока)

@@ -10,17 +10,21 @@ export const useGetWorkspace = ({ workspaceId }: UseGetWorkspaceProps) => {
   const query = useQuery({
     queryKey: ["workspace", workspaceId],
     queryFn: async () => {
-      const response = await client.api.workspaces[":workspaceId"].$get({
-        param: { workspaceId },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch workspace");
+      // Для обычных пользователей возвращаем фиктивный workspace
+      if (workspaceId === 'default-workspace') {
+        return {
+          $id: 'default-workspace',
+          $createdAt: new Date().toISOString(),
+          $updatedAt: new Date().toISOString(),
+          name: 'My Projects',
+          userId: 'current-user',
+          inviteCode: null,
+          imageUrl: null,
+        };
       }
-
-      const { data } = await response.json();
-
-      return data;
+      
+      // TODO: Реализовать для админов/владельцев когда будет endpoint
+      throw new Error("Workspace not found");
     },
   });
   return query;

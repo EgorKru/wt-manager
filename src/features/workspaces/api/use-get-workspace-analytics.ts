@@ -7,10 +7,18 @@ interface UseGetWorkspaceAnalyticsProps {
   workspaceId: string;
 }
 
-export type WorkspaceAnalyticsResponseType = InferResponseType<
-  (typeof client.api.workspaces)[":workspaceId"]["analytics"]["$get"],
-  200
->;
+export type WorkspaceAnalyticsResponseType = {
+  taskCount: number;
+  taskDifference: number;
+  assignedTaskCount: number;
+  assignedTaskDifference: number;
+  completedTaskCount: number;
+  completedTaskDifference: number;
+  inCompleteTaskCount: number;
+  inCompleteTaskDifference: number;
+  overDueTaskCount: number;
+  overDueTaskDifference: number;
+};
 
 export const useGetWorkspaceAnalytics = ({
   workspaceId,
@@ -18,19 +26,20 @@ export const useGetWorkspaceAnalytics = ({
   const query = useQuery({
     queryKey: ["workspace-analytics", workspaceId],
     queryFn: async () => {
-      const response = await client.api.workspaces[":workspaceId"][
-        "analytics"
-      ].$get({
-        param: { workspaceId },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch workspace analytics");
-      }
-
-      const { data } = await response.json();
-
-      return data;
+      // Для обычных пользователей возвращаем пустую аналитику
+      // TODO: Реализовать когда будет endpoint для аналитики
+      return {
+        taskCount: 0,
+        taskDifference: 0,
+        assignedTaskCount: 0,
+        assignedTaskDifference: 0,
+        completedTaskCount: 0,
+        completedTaskDifference: 0,
+        inCompleteTaskCount: 0,
+        inCompleteTaskDifference: 0,
+        overDueTaskCount: 0,
+        overDueTaskDifference: 0,
+      };
     },
   });
   return query;

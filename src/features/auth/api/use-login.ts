@@ -4,6 +4,7 @@ import { InferRequestType, InferResponseType } from "hono";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { client } from "@/lib/rpc";
+import { browserApiClient } from "@/lib/api-client-browser";
 
 type ResponseType = InferResponseType<(typeof client.api.auth.login)["$post"]>;
 type RequestType = InferRequestType<(typeof client.api.auth.login)["$post"]>;
@@ -20,7 +21,14 @@ export const useLogin = () => {
         throw new Error("Failed to log in");
       }
 
-      return await response.json();
+      const result = await response.json();
+      
+      // Сохраняем данные пользователя в localStorage
+      if (json.email) {
+        browserApiClient.saveUserLoginData(json.email);
+      }
+
+      return result;
     },
     onSuccess: () => {
       toast.success("Logged in");

@@ -1,20 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { client } from "@/lib/rpc";
-
 export const useGetWorkspaces = () => {
   const query = useQuery({
     queryKey: ["workspaces"],
     queryFn: async () => {
-      const response = await client.api.workspaces.$get();
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch workspaces");
-      }
-
-      const { data } = await response.json();
-
-      return data;
+      // Для обычных пользователей возвращаем один фиктивный workspace
+      // TODO: Реализовать для админов/владельцев когда будет endpoint
+      return {
+        documents: [{
+          $id: 'default-workspace',
+          $createdAt: new Date().toISOString(),
+          $updatedAt: new Date().toISOString(),
+          name: 'My Projects',
+          userId: 'current-user',
+          inviteCode: null,
+          imageUrl: null,
+        }],
+        total: 1,
+      };
     },
   });
   return query;
