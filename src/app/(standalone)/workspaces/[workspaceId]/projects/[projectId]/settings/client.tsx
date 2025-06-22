@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetProject } from "@/features/projects/api/use-get-project";
+import { useGetProject } from "@/features/projects/api/use-get-single-project";
 import { useProjectId } from "@/features/projects/hooks/use-project-id";
 import { EditProjectForm } from "@/features/projects/components/edit-project-form";
 

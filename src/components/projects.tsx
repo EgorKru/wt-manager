@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { RiAddCircleFill } from "react-icons/ri";
 
 import { cn } from "@/lib/utils";
-import { useGetProjects } from "@/features/projects/api/use-get-projects";
+import { useGetProjects } from "@/features/projects/api/use-get-projects-list";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { useCreateProjectModal } from "@/features/projects/hooks/use-create-project-modal";
