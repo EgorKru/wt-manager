@@ -1,4 +1,4 @@
-import type { ApiProject, ApiTask, AppProject, AppTask } from './api-types';
+import type { ApiProject, ApiTask, AppProject, AppTask } from './types';
 
 /**
  * Трансформирует проект из формата API в формат приложения

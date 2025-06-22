@@ -2,8 +2,26 @@ import "server-only";
 
 import { cookies } from "next/headers";
 import { apiClient } from "./api-client";
-import { browserApiClient } from './api-client-browser';
+import { browserApiClient } from '../api-client-browser';
 import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from "@/features/auth/constants";
+
+/**
+ * LEGACY: AppWrite адаптер для совместимости
+ * 
+ * TODO: Постепенно заменить на прямые вызовы новых сервисов:
+ * - authService для аутентификации
+ * - projectService для проектов  
+ * - taskService для задач
+ * 
+ * Используется в:
+ * - session-middleware.ts
+ * - auth/queries.ts
+ * - workspaces/queries.ts  
+ * - members/server/route.ts
+ * - tasks/server/route.ts
+ * - projects/server/route.ts
+ * - workspaces/server/route.ts
+ */
 
 // Типы для совместимости с AppWriter
 interface User {

@@ -2,9 +2,9 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { OAuthProvider } from "@/lib/api-types";
+import { OAuthProvider } from "@/lib/api/types";
 
-import { createAdminClient } from "@/lib/appwrite";
+import { createAdminClient } from "@/lib/legacy/appwrite";
 
 export async function signUpWithGithub() {
   // TODO: Реализовать OAuth через ваш API когда будут endpoints

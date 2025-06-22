@@ -1,9 +1,9 @@
 import "server-only";
 
-import { getCookie } from "hono/cookie";
-import { createMiddleware } from "hono/factory";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { ACCESS_TOKEN_COOKIE } from "@/features/auth/constants";
-import { createSessionClient } from "./appwrite";
+import { createSessionClient } from "../legacy/appwrite";
 
 // Типы для совместимости
 interface User {

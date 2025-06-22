@@ -1,7 +1,7 @@
-import { getCookie, setCookie } from './cookie-utils';
+import { getCookie, setCookie } from '../storage/cookie-utils';
 import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from '@/features/auth/constants';
 import { API_BASE_URL, API_VERSION } from '@/config';
-import type { RefreshTokenRequest } from './api-types';
+import type { RefreshTokenRequest } from '../api/types';
 
 /**
  * Менеджер для работы с токенами аутентификации

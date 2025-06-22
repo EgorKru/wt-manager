@@ -1,7 +1,7 @@
 import { httpClient } from '../http-client';
-import { tokenManager } from '../token-manager';
-import { saveUserData, getUserData } from '../user-storage';
-import type { LoginRequest, LoginResponse, UserData } from '../api-types';
+import { tokenManager } from '../../auth/token-manager';
+import { saveUserData, getUserData } from '../../storage/user-storage';
+import type { LoginRequest, LoginResponse, UserData } from '../types';
 
 /**
  * Сервис для работы с аутентификацией

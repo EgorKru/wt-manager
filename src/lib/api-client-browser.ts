@@ -1,8 +1,8 @@
 "use client";
 
-import { authService } from './services/auth-service';
-import { projectService } from './services/project-service';
-import { taskService } from './services/task-service';
+import { authService } from './api/services/auth-service';
+import { projectService } from './api/services/project-service';
+import { taskService } from './api/services/task-service';
 
 /**
  * Компактный API клиент объединяющий все сервисы

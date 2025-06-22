@@ -1,6 +1,6 @@
 import { httpClient } from '../http-client';
-import { transformApiTasksToApp } from '../data-transformers';
-import type { ApiTask, AppTask, UpdateTaskStatusRequest } from '../api-types';
+import { transformApiTasksToApp } from '../transformers';
+import type { ApiTask, AppTask, UpdateTaskStatusRequest } from '../types';
 
 /**
  * Сервис для работы с задачами

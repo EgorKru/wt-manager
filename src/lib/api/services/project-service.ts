@@ -1,5 +1,5 @@
 import { httpClient } from '../http-client';
-import type { ApiProject } from '../api-types';
+import type { ApiProject } from '../types';
 
 /**
  * Сервис для работы с проектами

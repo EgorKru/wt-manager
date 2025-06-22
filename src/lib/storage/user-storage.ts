@@ -1,4 +1,4 @@
-import type { UserData } from './api-types';
+import type { UserData } from '../api/types';
 
 /**
  * Утилиты для сохранения данных пользователя в localStorage

@@ -1,5 +1,5 @@
 import { API_BASE_URL, API_VERSION } from '@/config';
-import { tokenManager } from './token-manager';
+import { tokenManager } from '../auth/token-manager';
 
 /**
  * Базовый HTTP клиент для API запросов
