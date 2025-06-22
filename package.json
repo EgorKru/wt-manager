@@ -1,12 +1,32 @@
 {
-  "name": "jira-clone",
-  "version": "0.1.0",
+  "name": "work-task-manager",
+  "version": "1.0.0",
+  "description": "Современный менеджер задач в стиле Jira с интеграцией внешнего API",
   "private": true,
+  "author": {
+    "name": "EgorKru",
+    "url": "https://github.com/EgorKru"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EgorKru/wt-manager.git"
+  },
+  "keywords": [
+    "task-manager",
+    "jira-clone", 
+    "kanban",
+    "project-management",
+    "nextjs",
+    "typescript",
+    "react"
+  ],
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",
