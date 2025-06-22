@@ -101,4 +101,98 @@ export enum TaskStatus {
   IN_PROGRESS = "IN_PROGRESS",
   REVIEW = "REVIEW",
   DONE = "DONE",
+}
+
+// Типы для API responses
+export interface ApiProject {
+  projectId: string;
+  projectName: string;
+  createdAt?: string;
+  updatedAt?: string;
+  imageUrl?: string;
+  image?: string;
+}
+
+export interface ApiTask {
+  id: string;
+  title: string;
+  description: string;
+  priority: string;
+  creator: string;
+  assignee: string;
+  projectId: string;
+  sprintId?: string;
+  taskType: string;
+  estimation: number;
+  status: TaskStatus;
+  creationDate: string;
+  updateDate: string;
+  code: string;
+  position?: number;
+}
+
+// Типы для приложения
+export interface AppProject {
+  $id: string;
+  $createdAt: string;
+  $updatedAt: string;
+  name: string;
+  workspaceId: string;
+  imageUrl?: string;
+}
+
+export interface AppTask {
+  $id: string;
+  name: string;
+  status: TaskStatus;
+  workspaceId: string;
+  assigneeId: string;
+  projectId: string;
+  position: number;
+  dueDate: string;
+  description: string;
+  priority: string;
+  creator: string;
+  taskType: string;
+  estimation: number;
+  code: string;
+  creationDate: string;
+  updateDate: string;
+  project: {
+    $id: string;
+    name: string;
+    imageUrl: string;
+  };
+  assignee: {
+    $id: string;
+    name: string;
+    email: string;
+  };
+}
+
+// Типы для API запросов
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface UpdateTaskStatusRequest {
+  code: string;
+  status: string;
+}
+
+export interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
 } 

@@ -5,19 +5,26 @@ interface UseGetProjectProps {
   projectId: string;
 }
 
+interface ProjectData {
+  $id: string;
+  $createdAt: string;
+  $updatedAt: string;
+  name: string;
+  workspaceId: string;
+  imageUrl?: string;
+}
+
 export const useGetProject = ({ projectId }: UseGetProjectProps) => {
-  const query = useQuery({
+  return useQuery({
     queryKey: ["project", projectId],
-    queryFn: async () => {
-      // Получаем список проектов и находим нужный
+    queryFn: async (): Promise<ProjectData> => {
       const projects = await browserApiClient.getUserProjects();
       const project = projects.find((p: any) => p.projectId === projectId);
       
       if (!project) {
-        throw new Error("Project not found");
+        throw new Error(`Project with ID ${projectId} not found`);
       }
       
-      // Преобразуем в формат, ожидаемый приложением
       return {
         $id: project.projectId,
         $createdAt: project.createdAt || new Date().toISOString(),
@@ -28,5 +35,4 @@ export const useGetProject = ({ projectId }: UseGetProjectProps) => {
       };
     },
   });
-  return query;
 };
