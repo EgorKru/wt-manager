@@ -26,8 +26,6 @@ export const useGetProjectAnalytics = ({
   const query = useQuery({
     queryKey: ["project-analytics", projectId],
     queryFn: async () => {
-      // TODO: Реализовать когда будет endpoint для аналитики
-      // Пока возвращаем пустые данные
       return {
         taskCount: 0,
         taskDifference: 0,
